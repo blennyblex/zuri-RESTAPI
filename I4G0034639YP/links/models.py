@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from .utils import generate_random_id
+from . import utils
 
 # Create your models here.
 class Link(models.Model):
@@ -11,11 +11,19 @@ class Link(models.Model):
     created_date = models.DateTimeField(auto_now_add = True)
     active = models.BooleanField(default = True)
 
+    def __str__(self):
+        return f"{self.identifier}"
 
     def save(self, *args, **kwargs):
-        self.identifier = generate_random_id()
-        super(Link, self).save(*args, **kwargs)
+        if not self.identifier:
+            random_id = utils.generate_random_id()
 
-    def __str__(self):
-        return self.identifier
+            while Link.objects.filter(identifier = random_id).exists():
+                random_id = utils.generate_random_id()
+
+            self.identifier = random_id()
+
+        super().save(*args, **kwargs)
+
+
         
